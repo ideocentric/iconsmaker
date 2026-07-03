@@ -1,0 +1,24 @@
+Source: iconsmaker
+Section: graphics
+Priority: optional
+Maintainer: Matt Comeione <6080346+ideocentric@users.noreply.github.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ cargo,
+ rustc (>= 1.85)
+Standards-Version: 4.6.2
+Homepage: https://github.com/ideocentric/iconsmaker
+Vcs-Git: https://github.com/ideocentric/iconsmaker.git
+Vcs-Browser: https://github.com/ideocentric/iconsmaker
+Rules-Requires-Root: no
+
+Package: iconsmaker
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: generate platform icon bundles from a single SVG
+ iconsmaker reads a single source SVG (plus a small TOML config or command-line
+ flags) and generates deployment-ready icon assets for macOS (.icns), Windows
+ (.ico) and Linux (freedesktop hicolor PNG tree, .desktop entry, AppStream
+ metainfo), plus optional Snap, Flatpak and AppImage packaging scaffolding.
+ .
+ The build is pure Rust (no system C libraries); the binary links only glibc.

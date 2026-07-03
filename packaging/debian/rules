@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+# iconsmaker Debian packaging — offline Rust build.
+#
+# Launchpad/Debian builders have NO network, so crate dependencies must be
+# vendored into ./vendor before building the source package (see README.md).
+# CARGO_HOME is redirected to a build-local dir with a config that points cargo
+# at the vendored sources.
+
+export CARGO_HOME := $(CURDIR)/debian/cargo
+export CARGO_NET_OFFLINE := true
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	mkdir -p $(CARGO_HOME)
+	printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > $(CARGO_HOME)/config.toml
+
+override_dh_auto_build:
+	cargo build --release --offline --locked
+
+override_dh_auto_test:
+	./target/release/iconsmaker --version
+
+override_dh_auto_install:
+	install -Dm0755 target/release/iconsmaker debian/iconsmaker/usr/bin/iconsmaker
+	./target/release/iconsmaker --print-man-page > debian/iconsmaker.1
+	install -Dm0644 debian/iconsmaker.1 debian/iconsmaker/usr/share/man/man1/iconsmaker.1
+
+override_dh_auto_clean:
+	rm -rf target $(CARGO_HOME) debian/iconsmaker.1

@@ -11,7 +11,8 @@ universal (arm64 + x86_64) binary.
 
 | Platform | Artifact | Source in this dir |
 |---|---|---|
-| Linux (Debian/Ubuntu) | `.deb` | `[package.metadata.deb]` in `Cargo.toml` (`cargo deb`) |
+| Linux (Debian/Ubuntu) | `.deb` (prebuilt) | `[package.metadata.deb]` in `Cargo.toml` (`cargo deb`) |
+| Linux (Ubuntu PPA) | `.deb` (source build) | `debian/` (see `debian/README.md`) |
 | Linux (Fedora/RHEL) | `.rpm` (prebuilt) | `[package.metadata.generate-rpm]` in `Cargo.toml` (`cargo generate-rpm`) |
 | Linux (Fedora COPR) | `.rpm` (source build) | `copr/iconsmaker.spec` |
 | macOS | Homebrew formula | `homebrew/iconsmaker.rb.tmpl` |
@@ -81,3 +82,15 @@ sudo dnf install iconsmaker
 ```
 
 Bump `Version` and add a `%changelog` entry in the spec for each new release.
+
+## Ubuntu PPA
+
+`debian/` holds a vendored, offline-building source package for a Launchpad PPA.
+Because Launchpad builds have no network and use the distro `rustc`, there are two
+gotchas (crate vendoring, and a `rustc >= 1.85` requirement) — see
+[`debian/README.md`](debian/README.md) for the full build/upload flow. Users then:
+
+```bash
+sudo add-apt-repository ppa:ideocentric/iconsmaker
+sudo apt update && sudo apt install iconsmaker
+```
