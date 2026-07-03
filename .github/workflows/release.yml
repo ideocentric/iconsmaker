@@ -110,6 +110,7 @@ jobs:
   windows:
     needs: linux
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runner: windows-latest

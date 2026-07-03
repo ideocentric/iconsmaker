@@ -54,10 +54,16 @@
                             KeyPath="yes"/>
                     </Component>
 
-                    <!-- License + HTML help. -->
-                    <Component Id="docs" Guid="*" Win64="yes">
+                    <!-- License and HTML help, each in its own single-file
+                         component so they can use auto-generated GUIDs (a
+                         multi-file component with an unversioned keypath cannot
+                         — WiX error LGHT0367). -->
+                    <Component Id="license" Guid="*" Win64="yes">
                         <File Id="licenseTxt" Name="LICENSE.txt" DiskId="1" Source="LICENSE" KeyPath="yes"/>
-                        <File Id="iconsmakerHtml" Name="iconsmaker.html" DiskId="1" Source="target\assets\iconsmaker.html"/>
+                    </Component>
+
+                    <Component Id="htmlDoc" Guid="*" Win64="yes">
+                        <File Id="iconsmakerHtml" Name="iconsmaker.html" DiskId="1" Source="target\assets\iconsmaker.html" KeyPath="yes"/>
                     </Component>
 
                     <!-- Add the install folder to the system PATH. -->
@@ -87,7 +93,8 @@
             Display="expand"
             Absent="disallow">
             <ComponentRef Id="binary"/>
-            <ComponentRef Id="docs"/>
+            <ComponentRef Id="license"/>
+            <ComponentRef Id="htmlDoc"/>
             <ComponentRef Id="path"/>
         </Feature>
 

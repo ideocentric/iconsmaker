@@ -7,6 +7,22 @@ description = "Generate platform icon bundles (macOS, Windows, Linux) from a sin
 repository = "https://github.com/ideocentric/iconsmaker"
 readme = "README.md"
 authors = ["Matt Comeione <6080346+ideocentric@users.noreply.github.com>"]
+keywords = ["icon", "svg", "icns", "ico", "cli"]
+categories = ["command-line-utilities", "multimedia::images"]
+# Keep the published crate focused on the tool itself — packaging, CI, Docker,
+# and extra docs aren't needed by `cargo install` users.
+# Leading slash anchors to the crate root, so these don't also match the
+# src/packaging/ module.
+exclude = [
+    "/.github/",
+    "/packaging/",
+    "/wix/",
+    "/docs/",
+    "/Dockerfile",
+    "/docker-compose.yml",
+    "/.dockerignore",
+    "/icons.template.toml",
+]
 
 [[bin]]
 name = "iconsmaker"
