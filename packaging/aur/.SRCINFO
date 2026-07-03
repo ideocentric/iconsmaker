@@ -1,0 +1,13 @@
+pkgbase = iconsmaker
+	pkgdesc = Generate platform icon bundles (macOS, Windows, Linux) from a single SVG
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/ideocentric/iconsmaker
+	arch = x86_64
+	arch = aarch64
+	license = GPL-3.0-or-later
+	makedepends = cargo
+	source = iconsmaker-0.1.0.tar.gz::https://github.com/ideocentric/iconsmaker/archive/refs/tags/v0.1.0.tar.gz
+	sha256sums = 6fcf4c5b056ed195ac425a71550591ae3b23f911484199f6d1fcfe9797c0cd9f
+
+pkgname = iconsmaker

@@ -18,6 +18,8 @@ universal (arm64 + x86_64) binary.
 | macOS | Homebrew formula | `homebrew/iconsmaker.rb.tmpl` |
 | Windows | `.msi` | `../wix/main.wxs` (`cargo wix`) |
 | Windows | winget manifest | `winget/ideocentric.iconsmaker.*.yaml` |
+| Windows | Scoop manifest | `ideocentric/scoop-bucket` repo |
+| Arch | AUR `PKGBUILD` | `aur/` (see `aur/README.md`) |
 
 ## Documentation artifacts
 
@@ -94,3 +96,38 @@ gotchas (crate vendoring, and a `rustc >= 1.85` requirement) — see
 sudo add-apt-repository ppa:ideocentric/iconsmaker
 sudo apt update && sudo apt install iconsmaker
 ```
+
+## Windows — winget
+
+The three `winget/ideocentric.iconsmaker.*.yaml` manifests are rendered per
+release (x64 + arm64 MSIs, real sha256) and attached to the GitHub Release.
+Submit them to [`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs)
+with [`wingetcreate`](https://github.com/microsoft/winget-create):
+
+```powershell
+# Fetch the rendered manifests from the release, then:
+wingetcreate submit --token <gh-token> path\to\manifests\
+```
+
+(Or fork winget-pkgs, drop the three files under
+`manifests/i/ideocentric/iconsmaker/<version>/`, and open a PR.) Once merged:
+`winget install ideocentric.iconsmaker`. A future automation option is the
+[winget-releaser](https://github.com/vedantmgoyal9/winget-releaser) action.
+
+## Windows — Scoop
+
+Manifest lives in the separate bucket repo
+[`ideocentric/scoop-bucket`](https://github.com/ideocentric/scoop-bucket)
+(`bucket/iconsmaker.json`, x64 + arm64, with `checkver`/`autoupdate`):
+
+```powershell
+scoop bucket add ideocentric https://github.com/ideocentric/scoop-bucket
+scoop install iconsmaker
+```
+
+## Arch — AUR
+
+`aur/` holds a source-build `PKGBUILD` + `.SRCINFO`. Arch's rolling `rustc` is
+always current, so it builds from the release tag with `cargo`. See
+[`aur/README.md`](aur/README.md) for how to push it to the AUR (needs an AUR
+account + SSH key). Once published: `yay -S iconsmaker`.

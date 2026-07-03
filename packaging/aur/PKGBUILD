@@ -1,0 +1,38 @@
+# Maintainer: Matt Comeione <6080346+ideocentric@users.noreply.github.com>
+pkgname=iconsmaker
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Generate platform icon bundles (macOS, Windows, Linux) from a single SVG"
+arch=('x86_64' 'aarch64')
+url="https://github.com/ideocentric/iconsmaker"
+license=('GPL-3.0-or-later')
+makedepends=('cargo')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('6fcf4c5b056ed195ac425a71550591ae3b23f911484199f6d1fcfe9797c0cd9f')
+
+prepare() {
+    cd "$pkgname-$pkgver"
+    export RUSTUP_TOOLCHAIN=stable
+    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+    cd "$pkgname-$pkgver"
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --frozen --release
+}
+
+check() {
+    cd "$pkgname-$pkgver"
+    ./target/release/"$pkgname" --version
+}
+
+package() {
+    cd "$pkgname-$pkgver"
+    install -Dm0755 "target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
+    ./target/release/"$pkgname" --print-man-page > "$pkgname.1"
+    install -Dm0644 "$pkgname.1" "$pkgdir/usr/share/man/man1/$pkgname.1"
+    install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm0644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
