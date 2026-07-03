@@ -137,8 +137,17 @@ jobs:
           mkdir -p target/assets
           cp linux-artifacts/$BIN.html target/assets/$BIN.html
       - name: Install WiX + cargo-wix
+        shell: pwsh
         run: |
           choco install wixtoolset -y --no-progress
+          # choco's PATH change isn't visible to later steps, and the arm64 runner
+          # has no preinstalled WiX — so locate candle.exe and add its dir to PATH.
+          $candle = Get-ChildItem `
+            "C:\Program Files (x86)\WiX Toolset*\bin\candle.exe", `
+            "C:\Program Files\WiX Toolset*\bin\candle.exe" `
+            -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $candle) { Write-Error "candle.exe not found after WiX install"; exit 1 }
+          Add-Content -Path $env:GITHUB_PATH -Value $candle.DirectoryName
           cargo install cargo-wix
       - name: Build MSI
         shell: bash
