@@ -12,7 +12,8 @@ universal (arm64 + x86_64) binary.
 | Platform | Artifact | Source in this dir |
 |---|---|---|
 | Linux (Debian/Ubuntu) | `.deb` | `[package.metadata.deb]` in `Cargo.toml` (`cargo deb`) |
-| Linux (Fedora/RHEL) | `.rpm` | `[package.metadata.generate-rpm]` in `Cargo.toml` (`cargo generate-rpm`) |
+| Linux (Fedora/RHEL) | `.rpm` (prebuilt) | `[package.metadata.generate-rpm]` in `Cargo.toml` (`cargo generate-rpm`) |
+| Linux (Fedora COPR) | `.rpm` (source build) | `copr/iconsmaker.spec` |
 | macOS | Homebrew formula | `homebrew/iconsmaker.rb.tmpl` |
 | Windows | `.msi` | `../wix/main.wxs` (`cargo wix`) |
 | Windows | winget manifest | `winget/ideocentric.iconsmaker.*.yaml` |
@@ -58,3 +59,25 @@ cargo install cargo-generate-rpm && cargo generate-rpm   # -> target/generate-rp
 # Windows MSI (on Windows, with the WiX toolset installed)
 cargo install cargo-wix && cargo wix
 ```
+
+## Fedora COPR
+
+`copr/iconsmaker.spec` builds iconsmaker **from source** (from the GitHub release
+tag) — this is what COPR consumes, distinct from the prebuilt `.rpm` the release
+CI attaches.
+
+1. Create a COPR project (needs a Fedora/FAS account) at
+   <https://copr.fedorainfracloud.org/>, e.g. `ideocentric/iconsmaker`.
+2. In the project settings, turn **ON "Enable network for builds"** — the build
+   runs `cargo build`, which fetches crates from crates.io.
+3. Add a build from `copr/iconsmaker.spec` (or an SRPM built from it). COPR builds
+   one RPM per selected chroot/arch.
+
+Users then:
+
+```bash
+sudo dnf copr enable ideocentric/iconsmaker
+sudo dnf install iconsmaker
+```
+
+Bump `Version` and add a `%changelog` entry in the spec for each new release.

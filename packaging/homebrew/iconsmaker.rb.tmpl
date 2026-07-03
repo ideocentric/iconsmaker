@@ -11,13 +11,11 @@
 class Iconsmaker < Formula
   desc "Generate platform icon bundles (macOS, Windows, Linux) from a single SVG"
   homepage "https://github.com/@REPO@"
-  version "@VERSION@"
-  license "GPL-3.0-or-later"
-
   # Single universal (arm64 + x86_64) build — runs natively on both Apple Silicon
-  # and Intel Macs.
+  # and Intel Macs. (Homebrew derives the version from the URL.)
   url "https://github.com/@REPO@/releases/download/v@VERSION@/iconsmaker-@VERSION@-universal-apple-darwin.tar.gz"
   sha256 "@SHA256_MACOS@"
+  license "GPL-3.0-or-later"
 
   def install
     bin.install "iconsmaker"
