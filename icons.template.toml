@@ -1,0 +1,132 @@
+# ==============================================================================
+# iconsmaker configuration template
+# ------------------------------------------------------------------------------
+# Copy to `icons.toml`, fill in the REQUIRED block, then fill the
+# VALIDATION-CRITICAL block if you want Linux .desktop / metainfo.xml that pass
+# `desktop-file-validate` and `appstreamcli validate`. Everything else has a
+# working default and can be left commented out.
+#
+# Run:  iconsmaker --config icons.toml
+# ==============================================================================
+
+
+[app]
+# ── REQUIRED ──────────────────────────────────────────────────────────────────
+# Without these three the config will not parse.
+
+# Reverse-DNS identifier. The single most load-bearing field: it is the filename
+# stem for EVERY generated asset, the .desktop Icon= key, the AppStream <id>, and
+# the application ID for Snap / Flatpak / AppImage. Keep it identical everywhere.
+id   = "com.example.MyApp"
+
+# Human-readable application name. Used for Name=, AppStream <name>, and as the
+# .icns / .ico filename (spaces are replaced with underscores).
+name = "My App"
+
+# Shell command for the .desktop Exec= field. `%F` passes selected files.
+exec = "myapp %F"
+
+# ── VALIDATION-CRITICAL ───────────────────────────────────────────────────────
+# Optional to the parser, but omitting these makes `appstreamcli validate` and
+# `desktop-file-validate` warn or fail. Fill them in for shippable Linux output.
+
+# One-line summary. Feeds .desktop Comment= and AppStream <summary>.
+comment = "One-line summary of what the app does"
+
+# Longer plain-text paragraph for store listings. AppStream <description>.
+description = "A fuller paragraph describing the application for software centers like GNOME Software and KDE Discover."
+
+# freedesktop menu categories. MUST come from the registered list or
+# desktop-file-validate errors:
+# https://specifications.freedesktop.org/menu-spec/latest/apa.html
+categories = ["Utility"]
+
+# License of the METADATA itself (not your app). AppStream requires this.
+# Common choices: CC0-1.0, MIT, FSFAP.
+metadata_license = "CC0-1.0"
+
+# Your application's SPDX license. AppStream <project_license>.
+license = "GPL-3.0-or-later"
+
+# Developer or studio name. AppStream <developer_name>.
+developer_name = "Your Name or Studio"
+
+# ── RECOMMENDED ───────────────────────────────────────────────────────────────
+# Improves desktop integration and store presentation. Safe to omit.
+
+# Project homepage. AppStream <url type="homepage">.
+homepage_url = "https://example.com"
+
+# Must match your window's WM_CLASS so docks/taskbars group windows correctly.
+startup_wm_class = "myapp"
+
+# Search terms. .desktop Keywords= and AppStream <keywords>.
+keywords = ["keyword1", "keyword2"]
+
+# Generic descriptor shown under the name in some menus, e.g. "Audio Editor".
+generic_name = "My Application Type"
+
+# File-type associations. Feeds .desktop MimeType= and AppStream <provides>.
+# Leave empty / omit if the app registers no file types.
+mime_types = []
+
+
+# ── Input assets ──────────────────────────────────────────────────────────────
+[input]
+# Path to the master SVG (1024×1024 square recommended), relative to the
+# working directory. REQUIRED.
+svg = "icons/master.svg"
+
+# Optional monochrome SVG for Linux system trays / panels. Placed under
+# hicolor/symbolic/apps/ when set.
+# symbolic_svg = "icons/symbolic.svg"
+
+
+# ── Output location ───────────────────────────────────────────────────────────
+[output]
+# Root directory for all generated assets. Default: "dist".
+dir = "dist"
+
+
+# ── Platform targets ──────────────────────────────────────────────────────────
+[platforms]
+# At least one must be true. All default to true.
+macos   = true
+windows = true
+linux   = true
+
+
+# ── Linux PNG sizes ───────────────────────────────────────────────────────────
+[linux]
+# freedesktop hicolor sizes to emit. 48 is the practical minimum; keep the full
+# set for best desktop-environment compatibility.
+hicolor_sizes = [16, 22, 24, 32, 48, 64, 128, 256, 512]
+
+
+# ── Visual effects (macOS only) ───────────────────────────────────────────────
+[effects]
+# Superellipse power for the macOS squircle mask. Must be >= 2.0.
+#   4 = rounder (classic squircle), 5 = macOS-like (default), 6+ = more rectangular
+squircle_power = 5.0
+
+# SDF bevel: rim highlight on the top edge, shadow on the bottom. Applied before
+# masking. Set false for a completely flat icon.
+squircle_depth = true
+
+# Lighting intensity, 0.0 (flat) .. 1.0 (maximum). 0.35 is a natural default.
+gloss_strength = 0.35
+
+# Gaussian blur on the lighting maps, 0.0 (sharp) .. 1.0 (very soft).
+#   0.00 = raw edge (may show staircase), 0.12 = default, 0.30 = very soft
+depth_blur = 0.12
+
+
+# ── Packaging scaffolding ─────────────────────────────────────────────────────
+[packaging]
+# Extra platform bundle trees. All default to false. These reuse the [app]
+# metadata above, so fill the VALIDATION-CRITICAL block before enabling them.
+snap     = false   # -> dist/snap/snap/gui/
+flatpak  = false   # -> dist/flatpak/app/share/
+appimage = false   # -> dist/appimage/<Name>.AppDir/
+# deb  is reserved and NOT yet implemented — this flag is currently inert.
+deb      = false

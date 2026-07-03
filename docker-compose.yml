@@ -1,0 +1,19 @@
+services:
+  iconsmaker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Mount the project to process as /workspace inside the container.
+    # PROJECT_DIR defaults to the current directory when not set.
+    #
+    # Usage from THIS repo (processes the bundled icons.toml):
+    #   docker compose run --rm iconsmaker
+    #
+    # Usage from ANOTHER project (point PROJECT_DIR at it):
+    #   PROJECT_DIR=/path/to/myapp docker compose run --rm iconsmaker
+    #
+    # Passing a different config file:
+    #   docker compose run --rm iconsmaker --config custom.toml
+    volumes:
+      - "${PROJECT_DIR:-.}:/workspace"
+    working_dir: /workspace

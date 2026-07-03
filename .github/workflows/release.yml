@@ -1,0 +1,195 @@
+name: release
+
+# Build native installers for all three platforms and publish them to a GitHub
+# Release whenever a v* tag is pushed. Repo-agnostic: download URLs are derived
+# from ${{ github.repository }}, and the Homebrew formula + winget manifests are
+# rendered here with the real version/URLs/sha256.
+#
+# Builds x86_64 + arm64 for Linux and Windows (native arm runners:
+# ubuntu-24.04-arm, windows-11-arm) and a universal macOS binary.
+#
+# NOTE: the Windows/WiX jobs need the WiX toolset, and the arm64 legs depend on
+# the arm hosted-runner labels being available to this repo; the first real run
+# may need a tweak to WiX provisioning or the arm64 MSI arch.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  BIN: iconsmaker
+
+jobs:
+  # ── Linux: .deb + .rpm + tarball for x86_64 and arm64 (native runners). ──────
+  # The x86_64 leg also emits the shared, arch-independent man page + HTML.
+  linux:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Version
+        run: echo "V=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - name: Build
+        run: cargo build --release
+      - name: Man page (+ HTML on x86_64)
+        run: |
+          mkdir -p target/assets
+          ./target/release/$BIN --print-man-page > target/assets/$BIN.1
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            sudo apt-get update && sudo apt-get install -y pandoc
+            pandoc -s -f man -t html target/assets/$BIN.1 -o target/assets/$BIN.html
+          fi
+      - name: Build packages
+        run: |
+          cargo install cargo-deb cargo-generate-rpm
+          cargo deb --no-build
+          cargo generate-rpm --arch ${{ matrix.arch }}
+      - name: Tarball
+        run: |
+          mkdir -p stage out
+          cp target/release/$BIN target/assets/$BIN.1 stage/
+          tar czf "out/$BIN-$V-${{ matrix.arch }}-unknown-linux-gnu.tar.gz" -C stage .
+      - name: Stage packages
+        run: |
+          cp target/debian/*.deb out/
+          cp target/generate-rpm/*.rpm out/
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            cp target/assets/$BIN.1 target/assets/$BIN.html out/
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: out/*
+
+  # ── macOS: one universal (arm64 + x86_64) tarball via lipo ─────────────────
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - name: Version
+        run: echo "V=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - name: Build both arches
+        run: |
+          cargo build --release --target aarch64-apple-darwin
+          cargo build --release --target x86_64-apple-darwin
+      - name: Combine into a universal binary
+        run: |
+          mkdir -p stage out
+          lipo -create -output stage/$BIN \
+            target/aarch64-apple-darwin/release/$BIN \
+            target/x86_64-apple-darwin/release/$BIN
+          lipo -archs stage/$BIN
+      - name: Package
+        run: |
+          ./stage/$BIN --print-man-page > stage/$BIN.1
+          TAR="$BIN-$V-universal-apple-darwin.tar.gz"
+          tar czf "$TAR" -C stage .
+          shasum -a 256 "$TAR" | awk '{print $1}' > "$TAR.sha256"
+          cp "$TAR" "$TAR.sha256" out/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: out/*
+
+  # ── Windows: MSI (+ zip) for x86_64 and arm64 (native runners). ─────────────
+  # Needs the Linux x86_64 job's arch-independent HTML help (bundled in the MSI).
+  windows:
+    needs: linux
+    strategy:
+      matrix:
+        include:
+          - runner: windows-latest
+            arch: x86_64
+          - runner: windows-11-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Version
+        shell: bash
+        run: echo "V=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - name: Build
+        run: cargo build --release
+      - name: Fetch HTML help
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-x86_64
+          path: linux-artifacts
+      - name: Stage docs
+        shell: bash
+        run: |
+          mkdir -p target/assets
+          cp linux-artifacts/$BIN.html target/assets/$BIN.html
+      - name: Install WiX + cargo-wix
+        run: |
+          choco install wixtoolset -y --no-progress
+          cargo install cargo-wix
+      - name: Build MSI
+        shell: bash
+        run: |
+          cargo wix --no-build --nocapture
+          mkdir -p out
+          cp target/wix/*.msi "out/$BIN-$V-${{ matrix.arch }}.msi"
+          7z a "out/$BIN-$V-${{ matrix.arch }}-windows.zip" ./target/release/$BIN.exe ./target/assets/$BIN.html ./LICENSE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.arch }}
+          path: out/*
+
+  # ── Publish: render Homebrew/winget, attach everything to the Release ──────
+  release:
+    needs: [linux, macos, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: staging
+          merge-multiple: true
+      - name: Render Homebrew + winget
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          REPO="${{ github.repository }}"
+          OWNER="${{ github.repository_owner }}"
+          macos_sha=$(sha256sum "staging/$BIN-$V-universal-apple-darwin.tar.gz" | awk '{print $1}')
+          msi_x64_sha=$(sha256sum "staging/$BIN-$V-x86_64.msi" | awk '{print $1}')
+          msi_arm64_sha=$(sha256sum "staging/$BIN-$V-arm64.msi" | awk '{print $1}')
+
+          mkdir -p rendered
+          sed -e "s|@VERSION@|$V|g" -e "s|@REPO@|$REPO|g" -e "s|@OWNER@|$OWNER|g" \
+              -e "s|@SHA256_MACOS@|$macos_sha|g" \
+              packaging/homebrew/iconsmaker.rb.tmpl > rendered/iconsmaker.rb
+
+          for f in packaging/winget/*.yaml; do
+            sed -e "s|@VERSION@|$V|g" -e "s|@REPO@|$REPO|g" -e "s|@OWNER@|$OWNER|g" \
+                -e "s|@SHA256_MSI_X64@|$msi_x64_sha|g" -e "s|@SHA256_MSI_ARM64@|$msi_arm64_sha|g" \
+                "$f" > "rendered/$(basename "$f")"
+          done
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            staging/*.deb
+            staging/*.rpm
+            staging/*.msi
+            staging/*.tar.gz
+            staging/*.zip
+            staging/iconsmaker.1
+            staging/iconsmaker.html
+            rendered/iconsmaker.rb
+            rendered/*.yaml

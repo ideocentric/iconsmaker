@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!--
+    iconsmaker sample source icon.
+    Flat 1024x1024 square: full-bleed background, centered mark, no rounded
+    corners / drop shadow / gloss (the tool applies platform shaping itself).
+    Motif: layered squares (one source SVG -> many icons) with a generation spark.
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#252D49"/>
+      <stop offset="1" stop-color="#121726"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF8A4D"/>
+      <stop offset="1" stop-color="#FF3D6E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- Back "source" square -->
+  <rect x="264" y="264" width="300" height="300" rx="64" fill="#5E6DBE"/>
+
+  <!-- Front "generated icon" square -->
+  <rect x="356" y="356" width="384" height="384" rx="86" fill="url(#front)"/>
+
+  <!-- Generation spark, centered on the front square -->
+  <path d="M548 402
+           Q576 520 694 548
+           Q576 576 548 694
+           Q520 576 402 548
+           Q520 520 548 402 Z"
+        fill="#FFFFFF"/>
+</svg>

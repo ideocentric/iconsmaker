@@ -1,0 +1,75 @@
+[package]
+name = "iconsmaker"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+description = "Generate platform icon bundles (macOS, Windows, Linux) from a single SVG"
+repository = "https://github.com/ideocentric/iconsmaker"
+readme = "README.md"
+authors = ["Matt Comeione <6080346+ideocentric@users.noreply.github.com>"]
+
+[[bin]]
+name = "iconsmaker"
+path = "src/main.rs"
+
+[dependencies]
+# SVG parsing and rendering
+usvg = "0.44"
+resvg = "0.44"
+tiny-skia = "0.11"
+
+# Image encoding
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+# Platform icon formats
+ico = "0.3"
+icns = "0.3"
+
+# CLI + config
+clap = { version = "4", features = ["derive"] }
+clap_mangen = "0.2"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+
+# Error handling
+anyhow = "1"
+
+# ============================================================================
+# Native Linux packaging
+#
+# The man page is generated at package time into target/assets/iconsmaker.1
+# (via `iconsmaker --print-man-page`), so both package builders reference that
+# path. Build steps:
+#   cargo build --release
+#   ./target/release/iconsmaker --print-man-page > target/assets/iconsmaker.1
+#   cargo deb --no-build            # produces target/debian/*.deb
+#   cargo generate-rpm             # produces target/generate-rpm/*.rpm
+# The binary links only glibc, so there are no extra runtime dependencies.
+# ============================================================================
+
+[package.metadata.deb]
+maintainer = "Matt Comeione <6080346+ideocentric@users.noreply.github.com>"
+copyright = "2026, Matt Comeione"
+license-file = ["LICENSE", "0"]
+section = "graphics"
+priority = "optional"
+extended-description = """
+iconsmaker reads a single source SVG and a small TOML config (or command-line
+flags) and generates deployment-ready icon assets for macOS (.icns), Windows
+(.ico) and Linux (freedesktop hicolor PNG tree, .desktop entry, AppStream
+metainfo), plus optional Snap, Flatpak and AppImage packaging scaffolding."""
+assets = [
+    ["target/release/iconsmaker", "usr/bin/", "755"],
+    ["target/assets/iconsmaker.1", "usr/share/man/man1/iconsmaker.1", "644"],
+    ["README.md", "usr/share/doc/iconsmaker/README.md", "644"],
+    ["LICENSE", "usr/share/doc/iconsmaker/LICENSE", "644"],
+]
+
+[package.metadata.generate-rpm]
+summary = "Generate platform icon bundles (macOS, Windows, Linux) from a single SVG"
+assets = [
+    { source = "target/release/iconsmaker", dest = "/usr/bin/iconsmaker", mode = "755" },
+    { source = "target/assets/iconsmaker.1", dest = "/usr/share/man/man1/iconsmaker.1", mode = "644", doc = true },
+    { source = "README.md", dest = "/usr/share/doc/iconsmaker/README.md", mode = "644", doc = true },
+    { source = "LICENSE", dest = "/usr/share/doc/iconsmaker/LICENSE", mode = "644", doc = true },
+]

@@ -1,0 +1,19 @@
+# winget installer manifest TEMPLATE.
+# Placeholder tokens are filled at release time by .github/workflows/release.yml.
+# PackageIdentifier / Publisher default to "Ideocentric" — change if your winget
+# publisher differs. Submit the rendered 3-file set to microsoft/winget-pkgs.
+PackageIdentifier: Ideocentric.iconsmaker
+PackageVersion: "@VERSION@"
+InstallerLocale: en-US
+InstallerType: wix
+Scope: machine
+UpgradeBehavior: install
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/@REPO@/releases/download/v@VERSION@/iconsmaker-@VERSION@-x86_64.msi
+    InstallerSha256: "@SHA256_MSI_X64@"
+  - Architecture: arm64
+    InstallerUrl: https://github.com/@REPO@/releases/download/v@VERSION@/iconsmaker-@VERSION@-arm64.msi
+    InstallerSha256: "@SHA256_MSI_ARM64@"
+ManifestType: installer
+ManifestVersion: 1.6.0

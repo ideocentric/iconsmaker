@@ -1,0 +1,25 @@
+# winget default-locale manifest TEMPLATE (see the installer manifest for notes).
+PackageIdentifier: Ideocentric.iconsmaker
+PackageVersion: "@VERSION@"
+PackageLocale: en-US
+Publisher: Matt Comeione
+PublisherUrl: https://github.com/@OWNER@
+PackageName: iconsmaker
+PackageUrl: https://github.com/@REPO@
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/@REPO@/blob/main/LICENSE
+ShortDescription: Generate platform icon bundles (macOS, Windows, Linux) from a single SVG
+Description: >-
+  iconsmaker reads a single source SVG and a small TOML config (or command-line
+  flags) and generates deployment-ready icon assets for macOS (.icns), Windows
+  (.ico) and Linux (freedesktop hicolor PNG tree, .desktop entry, AppStream
+  metainfo), plus optional Snap, Flatpak and AppImage packaging scaffolding.
+Moniker: iconsmaker
+Tags:
+  - icon
+  - svg
+  - macos
+  - windows
+  - linux
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

@@ -1,0 +1,49 @@
+# Example iconsmaker configuration.
+# A minimal, ready-to-edit config. For the fully annotated reference with every
+# field explained, see icons.template.toml.
+
+[app]
+id               = "com.example.ExampleApp"
+name             = "Example App"
+generic_name     = "Example Application"
+comment          = "One-line summary of the application"
+exec             = "exampleapp %F"
+categories       = ["Utility"]
+keywords         = ["example", "icons"]
+startup_wm_class = "exampleapp"
+license          = "MIT"
+metadata_license = "CC0-1.0"
+description      = "A short paragraph describing the application for software centers."
+homepage_url     = "https://example.com"
+developer_name   = "Example Developer"
+
+[input]
+svg = "icons/master.svg"
+# symbolic_svg = "icons/symbolic.svg"   # optional monochrome Linux tray variant
+
+[output]
+dir = "dist"
+
+[platforms]
+macos   = true
+windows = true
+linux   = true
+
+[effects]
+# Superellipse exponent for the macOS squircle mask.
+# 4 = rounder (classic squircle), 5 = macOS-like (default), 6+ = more rectangular
+squircle_power = 5.0
+
+# SDF bevel shading: rim highlight on top edge, shadow on bottom.
+squircle_depth = true
+gloss_strength = 0.35   # 0.0 (flat) → 1.0 (maximum)
+depth_blur     = 0.12   # lighting map blur: 0.0 = sharp, 0.30 = very soft
+
+[linux]
+hicolor_sizes = [16, 22, 24, 32, 48, 64, 128, 256, 512]
+
+[packaging]
+snap     = false
+flatpak  = false
+appimage = false
+deb      = false

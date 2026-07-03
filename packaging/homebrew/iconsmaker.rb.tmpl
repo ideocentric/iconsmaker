@@ -1,0 +1,30 @@
+# Homebrew formula TEMPLATE for iconsmaker.
+#
+# Placeholder tokens are substituted at release time by
+# .github/workflows/release.yml, which knows the tag version, the download URL,
+# and the universal tarball's sha256. The rendered `iconsmaker.rb` is attached
+# to the GitHub Release and (optionally) committed to the `homebrew-tap` repo.
+#
+# Install UX once published to a tap:
+#   brew tap @OWNER@/tap
+#   brew install iconsmaker
+class Iconsmaker < Formula
+  desc "Generate platform icon bundles (macOS, Windows, Linux) from a single SVG"
+  homepage "https://github.com/@REPO@"
+  version "@VERSION@"
+  license "GPL-3.0-or-later"
+
+  # Single universal (arm64 + x86_64) build — runs natively on both Apple Silicon
+  # and Intel Macs.
+  url "https://github.com/@REPO@/releases/download/v@VERSION@/iconsmaker-@VERSION@-universal-apple-darwin.tar.gz"
+  sha256 "@SHA256_MACOS@"
+
+  def install
+    bin.install "iconsmaker"
+    man1.install "iconsmaker.1"
+  end
+
+  test do
+    assert_match "iconsmaker", shell_output("#{bin}/iconsmaker --version")
+  end
+end

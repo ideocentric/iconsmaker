@@ -1,0 +1,30 @@
+# Build artifacts — can be gigabytes, never needed in the image build context
+target/
+dist/
+
+# Version control history
+.git/
+
+# IDE project files
+.idea/
+
+# Reference material only used during development
+information/
+
+# Packaging, installers, and CI — not needed to build the binary
+.github/
+packaging/
+wix/
+
+# Docs, sample assets, and example configs (build only needs Cargo.* + src/)
+*.md
+icons/
+icons.toml
+icons.template.toml
+
+# Meta / editor / OS cruft
+.gitignore
+.dockerignore
+docker-compose.yml
+.vscode/
+**/.DS_Store

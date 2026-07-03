@@ -1,0 +1,68 @@
+# ── Project ────────────────────────────────────────────────────────────────────
+# Working/reference material, not part of the published tool.
+information/
+dist/
+
+# Third-party / other-application assets — never publish these, even if
+# information/ is later un-ignored (e.g. to salvage more notes).
+information/resources/partialfkr-base-icon.svg   # base icon for another app (PartialFKR)
+information/resources/app-icon-shape.svg          # Apple squircle reference template
+
+# ── Rust ───────────────────────────────────────────────────────────────────────
+/target/
+# Cargo.lock is intentionally committed — this is a binary crate
+**/*.rs.bk          # rustfmt backups
+*.profraw           # coverage instrumentation
+
+# ── Packaging build artifacts ──────────────────────────────────────────────────
+# Built installers land under target/ (already ignored); these guard against
+# stray copies elsewhere in the tree, plus WiX intermediates and CI scratch dirs.
+*.deb
+*.rpm
+*.msi
+*.wixobj
+*.wixpdb
+/stage/
+/staging/
+/rendered/
+
+# ── Docker ─────────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+.env
+.env.*
+!.env.example
+
+# ── JetBrains IDEs ─────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# ── Other editors (contributors) ───────────────────────────────────────────────
+.vscode/
+*.swp
+*.swo
+*.swn
+
+# ── macOS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+# ── Windows ────────────────────────────────────────────────────────────────────
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ── Linux ──────────────────────────────────────────────────────────────────────
+*~
+.nfs*
