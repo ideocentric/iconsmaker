@@ -4,19 +4,7 @@ use tiny_skia::Transform;
 
 use super::RasterBuffer;
 
-/// Rasterize `svg_path` to a `size × size` RGBA pixel buffer.
-/// The SVG is scaled to fit (aspect-ratio preserved) and centred in the square.
-pub fn rasterize_svg(svg_path: &Path, size: u32) -> Result<RasterBuffer> {
-    let data = std::fs::read(svg_path)
-        .with_context(|| format!("cannot read SVG '{}'", svg_path.display()))?;
-    let opt = usvg::Options::default();
-    let tree = usvg::Tree::from_data(&data, &opt)
-        .with_context(|| format!("cannot parse SVG '{}'", svg_path.display()))?;
-    render_tree(&tree, size)
-}
-
 /// Parse the SVG once, then render at every requested size.
-/// Much more efficient than calling `rasterize_svg` in a loop.
 pub fn rasterize_sizes(svg_path: &Path, sizes: &[u32]) -> Result<Vec<RasterBuffer>> {
     let data = std::fs::read(svg_path)
         .with_context(|| format!("cannot read SVG '{}'", svg_path.display()))?;
