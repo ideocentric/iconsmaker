@@ -1,5 +1,5 @@
 # winget default-locale manifest TEMPLATE (see the installer manifest for notes).
-PackageIdentifier: Ideocentric.iconsmaker
+PackageIdentifier: ideocentric.iconsmaker
 PackageVersion: "@VERSION@"
 PackageLocale: en-US
 Publisher: Matt Comeione

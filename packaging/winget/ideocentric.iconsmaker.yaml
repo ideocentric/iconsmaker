@@ -1,5 +1,5 @@
 # winget version manifest TEMPLATE (see the installer manifest for notes).
-PackageIdentifier: Ideocentric.iconsmaker
+PackageIdentifier: ideocentric.iconsmaker
 PackageVersion: "@VERSION@"
 DefaultLocale: en-US
 ManifestType: version

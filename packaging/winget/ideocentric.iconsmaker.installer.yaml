@@ -1,8 +1,8 @@
 # winget installer manifest TEMPLATE.
 # Placeholder tokens are filled at release time by .github/workflows/release.yml.
-# PackageIdentifier / Publisher default to "Ideocentric" — change if your winget
+# PackageIdentifier / Publisher default to "ideocentric" — change if your winget
 # publisher differs. Submit the rendered 3-file set to microsoft/winget-pkgs.
-PackageIdentifier: Ideocentric.iconsmaker
+PackageIdentifier: ideocentric.iconsmaker
 PackageVersion: "@VERSION@"
 InstallerLocale: en-US
 InstallerType: wix

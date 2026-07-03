@@ -15,7 +15,7 @@ universal (arm64 + x86_64) binary.
 | Linux (Fedora/RHEL) | `.rpm` | `[package.metadata.generate-rpm]` in `Cargo.toml` (`cargo generate-rpm`) |
 | macOS | Homebrew formula | `homebrew/iconsmaker.rb.tmpl` |
 | Windows | `.msi` | `../wix/main.wxs` (`cargo wix`) |
-| Windows | winget manifest | `winget/Ideocentric.iconsmaker.*.yaml` |
+| Windows | winget manifest | `winget/ideocentric.iconsmaker.*.yaml` |
 
 ## Documentation artifacts
 
@@ -34,8 +34,8 @@ but three things must be set once the GitHub repo exists:
 2. **Homebrew tap** — create `ideocentric/homebrew-tap` and add the rendered
    `iconsmaker.rb` (attached to each Release), so users can
    `brew tap ideocentric/tap && brew install iconsmaker`.
-3. **winget publisher** — the manifests default to the `Ideocentric` publisher
-   and `Ideocentric.iconsmaker` identifier. Adjust if needed, then submit the
+3. **winget publisher** — the manifests default to the `ideocentric` publisher
+   and `ideocentric.iconsmaker` identifier. Adjust if needed, then submit the
    rendered 3-file set (attached to each Release) to
    [`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs).
 

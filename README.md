@@ -80,7 +80,7 @@ Both packages install the binary to `/usr/bin/iconsmaker` and the man page to
 ### Windows
 
 ```powershell
-winget install Ideocentric.iconsmaker
+winget install ideocentric.iconsmaker
 ```
 
 winget picks the right build for your CPU automatically. To install by hand,
