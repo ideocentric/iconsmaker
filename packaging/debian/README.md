@@ -18,12 +18,19 @@ sudo apt install iconsmaker
    `build-source-package.sh` helper does the vendoring for you; `debian/rules`
    points cargo at the vendored sources.
 
-2. **The builder uses the distro `rustc`.** iconsmaker is edition 2024, which
-   needs **rustc ≥ 1.85** (`debian/control` Build-Depends on `rustc (>= 1.85)`).
-   The PPA will only build on Ubuntu series whose `rustc` meets that — i.e.
-   recent series. Older series (e.g. jammy) ship an older rustc and will fail the
-   build-dependency. Options: target only recent series, or configure a Rust
-   toolchain PPA as a dependency in the Launchpad project's build settings.
+2. **The builder's default `rustc` lags upstream.** iconsmaker is edition 2024,
+   which needs **rustc ≥ 1.85**, but Ubuntu's *unversioned* `rustc` trails it
+   (noble 24.04 ships 1.75). Depending on `rustc (>= 1.85)` is therefore
+   unsatisfiable on the LTS and the build fails at `install-deps` with
+   `sbuild-build-depends-main-dummy : Depends: rustc (>= 1.85)`.
+   The fix (already in place): Build-Depend on the **co-installable versioned
+   toolchain** `cargo-1.85` / `rustc-1.85` (shipped in `noble-updates` and in
+   questing), and prepend `/usr/lib/rust-1.85/bin` to `PATH` in `debian/rules`
+   so the plain `cargo`/`rustc` calls resolve to 1.85. To move to a newer
+   pinned toolchain later, bump `1.85` in both `control` and `rules` in lockstep
+   (noble-updates carries up to `rustc-1.91`). Note: on noble the versioned
+   packages are amd64-first — if an arm64 build reports `rustc-1.85` unmet, pin
+   to whichever versioned toolchain is published for arm64.
 
 ## One-time setup
 

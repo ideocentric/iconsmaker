@@ -1,3 +1,12 @@
+iconsmaker (0.1.1-1~ppa2) noble; urgency=medium
+
+  * Build against the versioned Rust 1.85 toolchain (cargo-1.85/rustc-1.85)
+    instead of the archive default. Ubuntu's unversioned rustc lags upstream
+    (noble ships 1.75); edition 2024 requires rustc >= 1.85, so the previous
+    "rustc (>= 1.85)" Build-Depends was unsatisfiable on noble.
+
+ -- Matt Comeione <oss@ideocentric.com>  Sat, 04 Jul 2026 13:00:00 +0000
+
 iconsmaker (0.1.1-1~ppa1) noble; urgency=medium
 
   * Maintenance release (dead-code cleanup; packaging updates).

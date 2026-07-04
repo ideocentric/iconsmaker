@@ -16,7 +16,9 @@
 #   * Docker running.
 #   * The oss@ideocentric.com secret key in your host GnuPG.
 #   * The ppa:ideocentric/iconsmaker PPA created, key registered, CoC signed.
-#   * Target a RECENT Ubuntu series only (edition 2024 needs the distro rustc >= 1.85).
+#   * Target a series that carries the versioned Rust toolchain the packaging
+#     pins (cargo-1.85/rustc-1.85) — noble and questing both do. See
+#     packaging/debian/README.md for how the rustc-version constraint is handled.
 set -euo pipefail
 
 SERIES="${1:-noble}"

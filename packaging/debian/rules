@@ -9,6 +9,12 @@
 export CARGO_HOME := $(CURDIR)/debian/cargo
 export CARGO_NET_OFFLINE := true
 
+# Ubuntu's default rustc lags the release (noble ships 1.75), but edition 2024
+# needs >= 1.85. We Build-Depend on the co-installable versioned toolchain
+# (cargo-1.85/rustc-1.85, present on noble-updates and questing) and put its
+# real `cargo`/`rustc` first on PATH so the plain invocations below use 1.85.
+export PATH := /usr/lib/rust-1.85/bin:$(PATH)
+
 %:
 	dh $@
 
