@@ -203,3 +203,29 @@ jobs:
             staging/iconsmaker.html
             rendered/iconsmaker.rb
             rendered/*.yaml
+
+  # ── Trigger a Fedora COPR rebuild for this tag ─────────────────────────────
+  # Builds the exact tag from source (network enabled so cargo can fetch crates).
+  # Skips cleanly if the COPR_CONFIG secret isn't set. To enable: create a repo
+  # Actions secret COPR_CONFIG containing your COPR API token file (the block from
+  # https://copr.fedorainfracloud.org/api/ — [copr-cli] login/username/token/copr_url).
+  copr:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger COPR build for ${{ github.ref_name }}
+        env:
+          COPR_CONFIG: ${{ secrets.COPR_CONFIG }}
+        run: |
+          if [ -z "$COPR_CONFIG" ]; then
+            echo "COPR_CONFIG secret not set — skipping COPR rebuild."
+            exit 0
+          fi
+          mkdir -p ~/.config
+          printf '%s\n' "$COPR_CONFIG" > ~/.config/copr
+          pipx install copr-cli
+          copr-cli buildscm ideocentric/iconsmaker \
+            --clone-url "https://github.com/${{ github.repository }}" \
+            --commit "${GITHUB_REF_NAME}" \
+            --spec packaging/copr/iconsmaker.spec \
+            --type git --enable-net on --nowait

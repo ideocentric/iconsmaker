@@ -85,6 +85,17 @@ sudo dnf install iconsmaker
 
 Bump `Version` and add a `%changelog` entry in the spec for each new release.
 
+### Auto-rebuild on release
+
+The `copr` job in `.github/workflows/release.yml` triggers a COPR build of the
+exact tag (via `copr-cli buildscm … --enable-net on`) after each successful
+release. One-time setup — add a repository **Actions secret** named
+**`COPR_CONFIG`** whose value is your COPR API token block from
+<https://copr.fedorainfracloud.org/api/> (the `[copr-cli]` section with
+`login`/`username`/`token`/`copr_url`). Without the secret the job just logs a
+skip, so releases still succeed. The job assumes the COPR project is
+`ideocentric/iconsmaker`.
+
 ## Ubuntu PPA
 
 `debian/` holds a vendored, offline-building source package for a Launchpad PPA.
