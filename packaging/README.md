@@ -63,6 +63,24 @@ cargo install cargo-generate-rpm && cargo generate-rpm   # -> target/generate-rp
 cargo install cargo-wix && cargo wix
 ```
 
+## macOS — Homebrew
+
+The tap lives in the separate repo
+[`ideocentric/homebrew-tap`](https://github.com/ideocentric/homebrew-tap)
+(`Formula/iconsmaker.rb`, a universal-binary install):
+
+```bash
+brew tap ideocentric/tap
+brew install iconsmaker
+```
+
+**Auto-update on release:** the `release` job renders `iconsmaker.rb` (from
+`homebrew/iconsmaker.rb.tmpl`) and commits it into the tap on each release.
+One-time setup — add a repository **Actions secret** **`HOMEBREW_TAP_TOKEN`**: a
+Personal Access Token (fine-grained, scoped to `ideocentric/homebrew-tap` with
+**Contents: read and write**) — `GITHUB_TOKEN` can't push to another repo.
+Without the secret the step logs a skip, so releases still succeed.
+
 ## Fedora COPR
 
 `copr/iconsmaker.spec` builds iconsmaker **from source** (from the GitHub release

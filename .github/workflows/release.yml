@@ -204,6 +204,32 @@ jobs:
             rendered/iconsmaker.rb
             rendered/*.yaml
 
+      # Commit the freshly-rendered formula into the Homebrew tap. Needs a PAT
+      # with contents:write on ideocentric/homebrew-tap (repo Actions secret
+      # HOMEBREW_TAP_TOKEN) — GITHUB_TOKEN can't write to another repo. Skips if
+      # the secret is absent.
+      - name: Update Homebrew tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "HOMEBREW_TAP_TOKEN secret not set — skipping tap update."
+            exit 0
+          fi
+          V="${GITHUB_REF_NAME#v}"
+          git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/ideocentric/homebrew-tap.git" tap
+          cp rendered/iconsmaker.rb tap/Formula/iconsmaker.rb
+          cd tap
+          git config user.name "ideocentric"
+          git config user.email "6080346+ideocentric@users.noreply.github.com"
+          git add Formula/iconsmaker.rb
+          if git diff --cached --quiet; then
+            echo "Formula unchanged — nothing to commit."
+          else
+            git commit -m "iconsmaker $V"
+            git push
+          fi
+
   # ── Trigger a Fedora COPR rebuild for this tag ─────────────────────────────
   # Builds the exact tag from source (network enabled so cargo can fetch crates).
   # Skips cleanly if the COPR_CONFIG secret isn't set. To enable: create a repo
