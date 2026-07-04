@@ -1,3 +1,12 @@
+iconsmaker (0.1.1-1~ppa4) noble; urgency=medium
+
+  * Bump the pinned Rust toolchain to 1.89 (cargo-1.89/rustc-1.89). A transitive
+    dependency (image 0.25.x) requires rustc >= 1.88, so 1.85 failed the build
+    with "rustc 1.85.1 is not supported by ... image requires rustc 1.88.0".
+    noble-updates ships rustc-1.89 for both amd64 and arm64.
+
+ -- Matt Comeione <oss@ideocentric.com>  Sat, 04 Jul 2026 21:30:00 +0000
+
 iconsmaker (0.1.1-1~ppa3) noble; urgency=medium
 
   * Point cargo at the vendored sources with an absolute path

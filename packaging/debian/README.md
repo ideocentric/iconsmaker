@@ -23,14 +23,16 @@ sudo apt install iconsmaker
    (noble 24.04 ships 1.75). Depending on `rustc (>= 1.85)` is therefore
    unsatisfiable on the LTS and the build fails at `install-deps` with
    `sbuild-build-depends-main-dummy : Depends: rustc (>= 1.85)`.
-   The fix (already in place): Build-Depend on the **co-installable versioned
-   toolchain** `cargo-1.85` / `rustc-1.85` (shipped in `noble-updates` and in
-   questing), and prepend `/usr/lib/rust-1.85/bin` to `PATH` in `debian/rules`
-   so the plain `cargo`/`rustc` calls resolve to 1.85. To move to a newer
-   pinned toolchain later, bump `1.85` in both `control` and `rules` in lockstep
-   (noble-updates carries up to `rustc-1.91`). Note: on noble the versioned
-   packages are amd64-first — if an arm64 build reports `rustc-1.85` unmet, pin
-   to whichever versioned toolchain is published for arm64.
+   The fix (already in place): Build-Depend on a **co-installable versioned
+   toolchain** and prepend its `/usr/lib/rust-<ver>/bin` to `PATH` in
+   `debian/rules` so the plain `cargo`/`rustc` calls resolve to it. We currently
+   pin **`cargo-1.89` / `rustc-1.89`** — not because edition 2024 needs it, but
+   because a transitive dependency (`image` 0.25.x) requires **rustc ≥ 1.88**,
+   and noble-updates skips 1.86–1.88 (it jumps 1.85 → 1.89 → 1.91). Both 1.89
+   and 1.91 are published for amd64 **and** arm64. To move the pin, bump the
+   version in **`control` and `rules` in lockstep**. If the dependency tree's
+   MSRV climbs again, cargo will name the offending crate and its required
+   rustc — pin to the next available versioned toolchain at or above it.
 
 ## One-time setup
 

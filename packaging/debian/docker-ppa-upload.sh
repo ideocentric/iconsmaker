@@ -95,7 +95,7 @@ sed -i "1s/) [a-z]*;/) ${SERIES};/" "$S/debian/changelog"
 sed -i "1s/(\\([^)]*\\))/(\\1~${SERIES}1)/" "$S/debian/changelog"
 
 echo ">> Building + signing (enter your GPG passphrase when prompted)…"
-# -d: skip the build-dependency check. Build-Depends (cargo-1.85, rustc-1.85) are
+# -d: skip the build-dependency check. Build-Depends (cargo-1.89, rustc-1.89) are
 # satisfied on Launchpad's builder, not here — we only used rustup to vendor.
 # $SA_FLAG: -sa on first upload (include orig), -sd on re-upload (reuse archived orig).
 ( cd "$S" && debuild -S "$SA_FLAG" -d -k"$KEY" )
