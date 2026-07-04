@@ -45,10 +45,10 @@ jobs:
       - name: Man page (+ HTML on x86_64)
         run: |
           mkdir -p target/assets
-          ./target/release/$BIN --print-man-page > target/assets/$BIN.1
+          "./target/release/$BIN" --print-man-page > "target/assets/$BIN.1"
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             sudo apt-get update && sudo apt-get install -y pandoc
-            pandoc -s -f man -t html target/assets/$BIN.1 -o target/assets/$BIN.html
+            pandoc -s -f man -t html "target/assets/$BIN.1" -o "target/assets/$BIN.html"
           fi
       - name: Build packages
         run: |
@@ -58,14 +58,14 @@ jobs:
       - name: Tarball
         run: |
           mkdir -p stage out
-          cp target/release/$BIN target/assets/$BIN.1 stage/
+          cp "target/release/$BIN" "target/assets/$BIN.1" stage/
           tar czf "out/$BIN-$V-${{ matrix.arch }}-unknown-linux-gnu.tar.gz" -C stage .
       - name: Stage packages
         run: |
           cp target/debian/*.deb out/
           cp target/generate-rpm/*.rpm out/
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
-            cp target/assets/$BIN.1 target/assets/$BIN.html out/
+            cp "target/assets/$BIN.1" "target/assets/$BIN.html" out/
           fi
       - uses: actions/upload-artifact@v4
         with:
@@ -89,13 +89,13 @@ jobs:
       - name: Combine into a universal binary
         run: |
           mkdir -p stage out
-          lipo -create -output stage/$BIN \
-            target/aarch64-apple-darwin/release/$BIN \
-            target/x86_64-apple-darwin/release/$BIN
-          lipo -archs stage/$BIN
+          lipo -create -output "stage/$BIN" \
+            "target/aarch64-apple-darwin/release/$BIN" \
+            "target/x86_64-apple-darwin/release/$BIN"
+          lipo -archs "stage/$BIN"
       - name: Package
         run: |
-          ./stage/$BIN --print-man-page > stage/$BIN.1
+          "./stage/$BIN" --print-man-page > "stage/$BIN.1"
           TAR="$BIN-$V-universal-apple-darwin.tar.gz"
           tar czf "$TAR" -C stage .
           shasum -a 256 "$TAR" | awk '{print $1}' > "$TAR.sha256"
@@ -135,7 +135,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p target/assets
-          cp linux-artifacts/$BIN.html target/assets/$BIN.html
+          cp "linux-artifacts/$BIN.html" "target/assets/$BIN.html"
       - name: Install WiX + cargo-wix
         shell: pwsh
         run: |
@@ -155,7 +155,7 @@ jobs:
           cargo wix --no-build --nocapture
           mkdir -p out
           cp target/wix/*.msi "out/$BIN-$V-${{ matrix.arch }}.msi"
-          7z a "out/$BIN-$V-${{ matrix.arch }}-windows.zip" ./target/release/$BIN.exe ./target/assets/$BIN.html ./LICENSE
+          7z a "out/$BIN-$V-${{ matrix.arch }}-windows.zip" "./target/release/$BIN.exe" "./target/assets/$BIN.html" ./LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: windows-${{ matrix.arch }}
