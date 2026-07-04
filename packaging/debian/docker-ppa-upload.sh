@@ -66,7 +66,9 @@ sed -i "1s/) [a-z]*;/) ${SERIES};/" "$S/debian/changelog"
 sed -i "1s/(\\([^)]*\\))/(\\1~${SERIES}1)/" "$S/debian/changelog"
 
 echo ">> Building + signing (enter your GPG passphrase when prompted)…"
-( cd "$S" && debuild -S -sa -k"$KEY" )
+# -d: skip the build-dependency check. Build-Depends (cargo, rustc >= 1.85) are
+# satisfied on Launchpad's builder, not here — we only used rustup to vendor.
+( cd "$S" && debuild -S -sa -d -k"$KEY" )
 
 echo ">> Uploading to ppa:ideocentric/iconsmaker…"
 dput ppa:ideocentric/iconsmaker "$B"/${PKG}_*_source.changes
