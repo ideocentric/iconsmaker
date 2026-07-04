@@ -154,6 +154,11 @@ scoop bucket add ideocentric https://github.com/ideocentric/scoop-bucket
 scoop install iconsmaker
 ```
 
+**Auto-update:** the bucket repo runs a scheduled **Excavator** workflow
+(`.github/workflows/excavator.yml`) that uses the manifest's `checkver`/`autoupdate`
+to detect each new release, regenerate the URLs, recompute the sha256s, and commit
+the bump — no manual step and no secret (same-repo commit via `GITHUB_TOKEN`).
+
 ## Arch — AUR
 
 `aur/` holds a source-build `PKGBUILD` + `.SRCINFO`. Arch's rolling `rustc` is
