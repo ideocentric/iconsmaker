@@ -35,14 +35,29 @@ sudo apt install iconsmaker
 
 ## Build & upload
 
+### On a Linux box
+
 From a clean checkout at the release tag:
 
 ```bash
 packaging/debian/build-source-package.sh noble     # or another recent series
-dput ppa:ideocentric/iconsmaker /tmp/…/iconsmaker_0.1.0-1~ppa1~noble1_source.changes
+dput ppa:ideocentric/iconsmaker /tmp/…/iconsmaker_<ver>-1~ppa1~noble1_source.changes
 ```
 
-For multiple series, re-run with each series name — the helper appends
+### From macOS (or any host without Debian tooling) — via Docker
+
+```bash
+packaging/debian/docker-ppa-upload.sh noble        # run in your own terminal
+```
+
+Run it in a **real terminal** (it's interactive — GPG prompts for your key
+passphrase inside the container). It exports your signing key into an ephemeral
+`--rm` container (temp dir deleted on exit), vendors the crates, builds + signs
+the source package, and `dput`s it. The source-package build has been validated
+in an `ubuntu:24.04` container; only the signing/upload is untested (needs your
+key + a TTY).
+
+For multiple series, re-run either script with each series name — it appends
 `~<series>1` to the version so each upload is unique in the PPA.
 
 ## Files
