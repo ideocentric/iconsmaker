@@ -1,3 +1,12 @@
+iconsmaker (0.1.1-1~ppa3) noble; urgency=medium
+
+  * Point cargo at the vendored sources with an absolute path
+    ($(CURDIR)/vendor). The relative "vendor" was resolved by cargo relative to
+    CARGO_HOME, not the package root, so the offline build failed with
+    "failed to read root of directory source: .../debian/vendor".
+
+ -- Matt Comeione <oss@ideocentric.com>  Sat, 04 Jul 2026 18:00:00 +0000
+
 iconsmaker (0.1.1-1~ppa2) noble; urgency=medium
 
   * Build against the versioned Rust 1.85 toolchain (cargo-1.85/rustc-1.85)

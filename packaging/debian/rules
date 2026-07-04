@@ -20,7 +20,7 @@ export PATH := /usr/lib/rust-1.85/bin:$(PATH)
 
 override_dh_auto_configure:
 	mkdir -p $(CARGO_HOME)
-	printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > $(CARGO_HOME)/config.toml
+	printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "$(CURDIR)/vendor"\n' > $(CARGO_HOME)/config.toml
 
 override_dh_auto_build:
 	cargo build --release --offline --locked
