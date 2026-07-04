@@ -39,7 +39,7 @@ set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq dpkg-dev debhelper devscripts fakeroot dput \
-  curl git ca-certificates gnupg pinentry-curses >/dev/null
+  curl git ca-certificates gnupg pinentry-curses jq >/dev/null
 # rustup stable — the distro cargo can be too old to parse edition 2024 for `cargo vendor`
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
   | sh -s -- -y --profile minimal --default-toolchain stable >/dev/null 2>&1
@@ -54,13 +54,40 @@ gpg --batch --import /work/secret.asc
 
 PKG=iconsmaker
 VER="$(sed -n '1s/^[^(]*(\([0-9.]*\)-.*/\1/p' /src/packaging/debian/changelog)"
-B=/tmp/b; S="$B/$PKG-$VER"; mkdir -p "$S"
+ORIG="${PKG}_${VER}.orig.tar.gz"
+B=/tmp/b; S="$B/$PKG-$VER"; mkdir -p "$B"
 git config --global --add safe.directory /src
-git -C /src archive --format=tar HEAD | tar -x -C "$S"
-echo ">> Vendoring crates…"
-( cd "$S" && cargo vendor --locked vendor >/dev/null )
-tar -C "$B" -czf "$B/${PKG}_${VER}.orig.tar.gz" "$PKG-$VER"
-cp -r "$S/packaging/debian" "$S/debian"
+
+# The orig tarball is named by the UPSTREAM version only ($VER), independent of
+# the ~ppaN/~series revision. Launchpad rejects a re-upload whose orig has the
+# same name but different bytes ("already exists ... but ... different contents").
+# So if an orig for $VER is already published, download and REUSE it verbatim
+# (checksum matches) and upload source-only (-sd). Otherwise build it (-sa).
+PPA_API="https://api.launchpad.net/devel/~ideocentric/+archive/ubuntu/iconsmaker"
+echo ">> Checking whether $ORIG is already published…"
+ORIG_URL="$(curl -sSL "${PPA_API}?ws.op=getPublishedSources&status=Published" \
+  | jq -r '.entries[].self_link' \
+  | while read -r sp; do curl -sSL "${sp}?ws.op=sourceFileUrls" | jq -r '.[]'; done \
+  | grep -F "/${ORIG}" | head -1 || true)"
+
+if [ -n "$ORIG_URL" ]; then
+  echo ">> Reusing already-published orig (source-only upload): $ORIG_URL"
+  curl -sSL "$ORIG_URL" -o "$B/$ORIG"
+  tar -xzf "$B/$ORIG" -C "$B"            # recreates $B/$PKG-$VER (source + vendor)
+  SA_FLAG=-sd
+else
+  echo ">> No published orig for $VER; creating one (first upload)…"
+  git -C /src archive --format=tar HEAD | tar -x -C "$S"
+  echo ">> Vendoring crates…"
+  ( cd "$S" && cargo vendor --locked vendor >/dev/null )
+  tar -C "$B" -czf "$B/$ORIG" "$PKG-$VER"
+  SA_FLAG=-sa
+fi
+
+# Overlay the CURRENT packaging (committed HEAD) as debian/ — this is what carries
+# our fixes; the reused orig deliberately keeps the old upstream payload.
+rm -rf "$S/debian"
+cp -r /src/packaging/debian "$S/debian"
 rm -f "$S/debian/build-source-package.sh" "$S/debian/docker-ppa-upload.sh" "$S/debian/README.md"
 chmod +x "$S/debian/rules"
 # Retarget the changelog to $SERIES and make the version unique per series.
@@ -68,9 +95,10 @@ sed -i "1s/) [a-z]*;/) ${SERIES};/" "$S/debian/changelog"
 sed -i "1s/(\\([^)]*\\))/(\\1~${SERIES}1)/" "$S/debian/changelog"
 
 echo ">> Building + signing (enter your GPG passphrase when prompted)…"
-# -d: skip the build-dependency check. Build-Depends (cargo, rustc >= 1.85) are
+# -d: skip the build-dependency check. Build-Depends (cargo-1.85, rustc-1.85) are
 # satisfied on Launchpad's builder, not here — we only used rustup to vendor.
-( cd "$S" && debuild -S -sa -d -k"$KEY" )
+# $SA_FLAG: -sa on first upload (include orig), -sd on re-upload (reuse archived orig).
+( cd "$S" && debuild -S "$SA_FLAG" -d -k"$KEY" )
 
 echo ">> Uploading to ppa:ideocentric/iconsmaker…"
 dput ppa:ideocentric/iconsmaker "$B"/${PKG}_*_source.changes
