@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: iconsmaker
-Upstream-Contact: Matt Comeione <6080346+ideocentric@users.noreply.github.com>
+Upstream-Contact: Matt Comeione <oss@ideocentric.com>
 Source: https://github.com/ideocentric/iconsmaker
 
 Files: *

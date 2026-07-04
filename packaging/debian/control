@@ -1,7 +1,7 @@
 Source: iconsmaker
 Section: graphics
 Priority: optional
-Maintainer: Matt Comeione <6080346+ideocentric@users.noreply.github.com>
+Maintainer: Matt Comeione <oss@ideocentric.com>
 Build-Depends:
  debhelper-compat (= 13),
  cargo,
