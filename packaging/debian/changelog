@@ -1,3 +1,13 @@
+iconsmaker (0.1.1-1~ppa5) noble; urgency=medium
+
+  * Blank the per-file checksum maps in vendor/*/.cargo-checksum.json before the
+    offline build. dpkg-source's 3.0 (quilt) round-trip drops the vendored
+    Cargo.toml.orig files, but the checksum manifests still list them, so cargo
+    aborted with "failed to calculate checksum of ... Cargo.toml.orig". The
+    crate-level package hash is retained.
+
+ -- Matt Comeione <oss@ideocentric.com>  Sat, 04 Jul 2026 22:15:00 +0000
+
 iconsmaker (0.1.1-1~ppa4) noble; urgency=medium
 
   * Bump the pinned Rust toolchain to 1.89 (cargo-1.89/rustc-1.89). A transitive

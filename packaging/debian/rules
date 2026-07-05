@@ -24,6 +24,12 @@ override_dh_auto_configure:
 	printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "$(CURDIR)/vendor"\n' > $(CARGO_HOME)/config.toml
 
 override_dh_auto_build:
+	# dpkg-source's 3.0 (quilt) round-trip drops vendor/*/Cargo.toml.orig, but the
+	# vendored .cargo-checksum.json files still list them, so cargo's offline
+	# checksum verification aborts ("failed to calculate checksum of ...
+	# Cargo.toml.orig"). Blank the per-file checksum maps (the crate-level
+	# "package" hash is kept) so cargo skips the missing-file check.
+	find vendor -name .cargo-checksum.json -print0 | xargs -0 sed -i 's/"files":{[^}]*}/"files":{}/'
 	cargo build --release --offline --locked
 
 override_dh_auto_test:
