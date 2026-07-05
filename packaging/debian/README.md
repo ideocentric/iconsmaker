@@ -44,6 +44,28 @@ sudo apt install iconsmaker
 
 ## Build & upload
 
+### Test the build locally first (strongly recommended)
+
+Launchpad's build farm has a ~30–45 min round-trip, and every failure we hit was
+an *environment* mismatch (toolchain version, vendored-file handling, offline
+behaviour) — none of which the source-package scripts below exercise, because
+they only assemble the source package, they never compile it. So test first:
+
+```bash
+packaging/debian/build-test-local.sh noble        # ~few min; needs Docker
+```
+
+This reproduces the **builder** (not just the source package) in a clean
+`ubuntu:24.04` container: it installs the declared `Build-Depends` **from apt**
+via `mk-build-deps` (so a wrong `cargo-`/`rustc-` pin fails here exactly as on
+Launchpad — no rustup), runs the full `dpkg-source` 3.0 (quilt) round-trip (so
+vendored-file quirks like the dropped `Cargo.toml.orig` reproduce), and does an
+**offline `dpkg-buildpackage -b`** binary build. It prints the resulting `.deb`
+contents on success. The pinned Rust version is read straight from
+`debian/control`, so the test can never drift from what you upload. It's
+arm64-native on Apple Silicon; `DOCKER_PLATFORM=linux/amd64 …` also tests the
+(emulated, slower) other arch. **Only upload once this produces a `.deb`.**
+
 ### On a Linux box
 
 From a clean checkout at the release tag:
@@ -73,12 +95,14 @@ For multiple series, re-run either script with each series name — it appends
 
 | File | Purpose |
 |---|---|
-| `control` | Source/binary metadata, Build-Depends (`cargo`, `rustc >= 1.85`) |
-| `rules` | debhelper rules; offline cargo build + man page install |
+| `control` | Source/binary metadata, Build-Depends (`cargo-1.89`, `rustc-1.89`) |
+| `rules` | debhelper rules; offline cargo build (abs vendor path + checksum fixup) + man page install |
 | `changelog` | Version + target series (retargeted by the helper) |
 | `copyright` | DEP-5; GPL-3.0-or-later + a simplified `vendor/*` stanza |
 | `source/format` | `3.0 (quilt)` |
-| `build-source-package.sh` | Vendors deps, builds the orig tarball, runs `debuild -S` |
+| `build-test-local.sh` | **Reproduces the Launchpad builder in Docker (apt toolchain, quilt round-trip, offline build) — run before uploading** |
+| `docker-ppa-upload.sh` | macOS/Docker: reuse orig, build + sign the source package, `dput` to the PPA |
+| `build-source-package.sh` | Linux-box helper: vendors deps, builds the orig tarball, runs `debuild -S` |
 
 > **Untested locally** — none of this can be exercised on macOS (no
 > `dpkg-buildpackage`). Expect to iterate once on a Linux box / the first
