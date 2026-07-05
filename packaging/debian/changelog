@@ -1,3 +1,13 @@
+iconsmaker (0.1.1-1~ppa6) noble; urgency=medium
+
+  * Unify the pinned Rust toolchain on 1.91 (cargo-1.91/rustc-1.91) — the single
+    versioned toolchain shipped by both 24.04 (noble) and 26.04 (resolute) for
+    amd64 and arm64 — so one debian/ targets both LTS releases. 1.91 still
+    satisfies the dependency tree's rustc >= 1.88 requirement. No functional
+    change on noble (was 1.89); enables the resolute build.
+
+ -- Matt Comeione <oss@ideocentric.com>  Sun, 05 Jul 2026 06:50:50 +0000
+
 iconsmaker (0.1.1-1~ppa5) noble; urgency=medium
 
   * Blank the per-file checksum maps in vendor/*/.cargo-checksum.json before the

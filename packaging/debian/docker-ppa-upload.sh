@@ -17,7 +17,8 @@
 #   * The oss@ideocentric.com secret key in your host GnuPG.
 #   * The ppa:ideocentric/iconsmaker PPA created, key registered, CoC signed.
 #   * Target a series that carries the versioned Rust toolchain the packaging
-#     pins (cargo-1.85/rustc-1.85) — noble and questing both do. See
+#     pins (cargo-1.91/rustc-1.91) — noble (24.04) and resolute (26.04) both do,
+#     for amd64+arm64. Add new series to the series->image map below. See
 #     packaging/debian/README.md for how the rustc-version constraint is handled.
 set -euo pipefail
 
@@ -26,6 +27,15 @@ KEY="E45E7C1B2DD9EE19653E4B2E4508404C0CEFDF94"   # oss@ideocentric.com signing k
 REPO_ROOT="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
+
+# Map the Ubuntu series to its Docker base image. Keep in sync with the same map
+# in build-test-local.sh; extend both as new series are targeted.
+case "$SERIES" in
+  noble)    IMAGE=ubuntu:24.04 ;;   # 24.04 LTS
+  resolute) IMAGE=ubuntu:26.04 ;;   # 26.04 LTS
+  questing) IMAGE=ubuntu:25.10 ;;
+  *) echo "unknown series '$SERIES' — add it to the series->image map in $0"; exit 1 ;;
+esac
 
 command -v docker >/dev/null || { echo "docker not found / not running"; exit 1; }
 
@@ -88,7 +98,8 @@ fi
 # our fixes; the reused orig deliberately keeps the old upstream payload.
 rm -rf "$S/debian"
 cp -r /src/packaging/debian "$S/debian"
-rm -f "$S/debian/build-source-package.sh" "$S/debian/docker-ppa-upload.sh" "$S/debian/README.md"
+rm -f "$S/debian/build-source-package.sh" "$S/debian/docker-ppa-upload.sh" \
+      "$S/debian/build-test-local.sh" "$S/debian/README.md"
 chmod +x "$S/debian/rules"
 # Retarget the changelog to $SERIES and make the version unique per series.
 sed -i "1s/) [a-z]*;/) ${SERIES};/" "$S/debian/changelog"
@@ -108,7 +119,7 @@ docker run --rm -it \
   -e SERIES="$SERIES" -e KEY="$KEY" \
   -v "$REPO_ROOT:/src:ro" \
   -v "$WORK:/work" \
-  ubuntu:24.04 bash /work/run.sh
+  "$IMAGE" bash /work/run.sh
 
 echo
 echo ">> Done. Watch the build at:"

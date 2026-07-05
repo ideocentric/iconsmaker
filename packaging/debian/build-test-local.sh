@@ -28,6 +28,15 @@ PLATFORM_ARG=()
 
 command -v docker >/dev/null || { echo "docker not found / not running"; exit 1; }
 
+# Map the Ubuntu series to its Docker base image. Keep in sync with the same map
+# in docker-ppa-upload.sh; extend both as new series are targeted.
+case "$SERIES" in
+  noble)    IMAGE=ubuntu:24.04 ;;   # 24.04 LTS
+  resolute) IMAGE=ubuntu:26.04 ;;   # 26.04 LTS
+  questing) IMAGE=ubuntu:25.10 ;;
+  *) echo "unknown series '$SERIES' — add it to the series->image map in $0"; exit 1 ;;
+esac
+
 # Keep the toolchain the test installs in lockstep with the packaging.
 RUST_VER="$(sed -n 's/.*rustc-\([0-9.]*\).*/\1/p' "$REPO_ROOT/packaging/debian/control" | head -1)"
 [ -n "$RUST_VER" ] || { echo "could not read rustc-<ver> pin from debian/control"; exit 1; }
@@ -45,7 +54,11 @@ PKG=iconsmaker
 VER="$(sed -n '1s/^[^(]*(\([0-9.]*\)-.*/\1/p' /src/packaging/debian/changelog)"
 B=/tmp/b; S="$B/$PKG-$VER"; mkdir -p "$S"
 git config --global --add safe.directory /src
-git -C /src archive --format=tar HEAD | tar -x -C "$S"
+# Test the WORKING TREE (all tracked files at their current content), NOT HEAD, so
+# uncommitted packaging edits are validated before you commit/upload. (docker-ppa-
+# upload.sh uploads committed HEAD, so: edit -> build-test -> commit -> upload.)
+# Caveat: brand-new files must be `git add`ed to be seen (ls-files = tracked only).
+( cd /src && git ls-files -z | tar --null -T - -cf - ) | tar -x -C "$S"
 
 # Overlay the packaging as debian/ and install its Build-Depends from apt exactly
 # as declared — this is where a bad cargo-/rustc- pin blows up, just like the PPA.
@@ -79,9 +92,9 @@ echo ">> .deb contents:"
 dpkg-deb -c "$B/x"/*.deb
 CEOF
 
-echo ">> Local Launchpad-build reproduction (series=$SERIES, rust=$RUST_VER, host arch=$(uname -m)${DOCKER_PLATFORM:+, platform=$DOCKER_PLATFORM})"
+echo ">> Local Launchpad-build reproduction (series=$SERIES, image=$IMAGE, rust=$RUST_VER, host arch=$(uname -m)${DOCKER_PLATFORM:+, platform=$DOCKER_PLATFORM})"
 docker run --rm ${PLATFORM_ARG[@]+"${PLATFORM_ARG[@]}"} \
   -e RUST_VER="$RUST_VER" \
   -v "$REPO_ROOT:/src:ro" \
   -v "$RUN:/build-test.sh:ro" \
-  ubuntu:24.04 bash /build-test.sh
+  "$IMAGE" bash /build-test.sh

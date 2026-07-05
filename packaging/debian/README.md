@@ -25,14 +25,17 @@ sudo apt install iconsmaker
    `sbuild-build-depends-main-dummy : Depends: rustc (>= 1.85)`.
    The fix (already in place): Build-Depend on a **co-installable versioned
    toolchain** and prepend its `/usr/lib/rust-<ver>/bin` to `PATH` in
-   `debian/rules` so the plain `cargo`/`rustc` calls resolve to it. We currently
-   pin **`cargo-1.89` / `rustc-1.89`** — not because edition 2024 needs it, but
-   because a transitive dependency (`image` 0.25.x) requires **rustc ≥ 1.88**,
-   and noble-updates skips 1.86–1.88 (it jumps 1.85 → 1.89 → 1.91). Both 1.89
-   and 1.91 are published for amd64 **and** arm64. To move the pin, bump the
-   version in **`control` and `rules` in lockstep**. If the dependency tree's
-   MSRV climbs again, cargo will name the offending crate and its required
-   rustc — pin to the next available versioned toolchain at or above it.
+   `debian/rules` so the plain `cargo`/`rustc` calls resolve to it. We pin
+   **`cargo-1.91` / `rustc-1.91`** — not because edition 2024 needs it (it needs
+   1.85), but because a transitive dependency (`image` 0.25.x) requires
+   **rustc ≥ 1.88**, *and* because 1.91 is the single versioned toolchain that
+   **both** 24.04 (noble) and 26.04 (resolute) ship for amd64 **and** arm64 — so
+   one `debian/` targets both LTS releases (noble has 1.85/1.89/1.91; resolute
+   has 1.91/1.92/1.93; the overlap is 1.91). To move the pin, bump the version in
+   **`control` and `rules` in lockstep** — and pick one present on every series
+   you target. If the dependency tree's MSRV climbs again, cargo names the
+   offending crate and its required rustc; pin to the next shared toolchain at or
+   above it.
 
 ## One-time setup
 
@@ -78,24 +81,29 @@ dput ppa:ideocentric/iconsmaker /tmp/…/iconsmaker_<ver>-1~ppa1~noble1_source.c
 ### From macOS (or any host without Debian tooling) — via Docker
 
 ```bash
-packaging/debian/docker-ppa-upload.sh noble        # run in your own terminal
+packaging/debian/docker-ppa-upload.sh noble        # 24.04 — run in your own terminal
+packaging/debian/docker-ppa-upload.sh resolute     # 26.04
 ```
 
 Run it in a **real terminal** (it's interactive — GPG prompts for your key
 passphrase inside the container). It exports your signing key into an ephemeral
-`--rm` container (temp dir deleted on exit), vendors the crates, builds + signs
-the source package, and `dput`s it. The source-package build has been validated
-in an `ubuntu:24.04` container; only the signing/upload is untested (needs your
-key + a TTY).
+`--rm` container (temp dir deleted on exit), reuses/creates the orig, builds +
+signs the source package, and `dput`s it.
 
-For multiple series, re-run either script with each series name — it appends
-`~<series>1` to the version so each upload is unique in the PPA.
+**Supported series** are whatever the `series->image` map in the two scripts
+knows: currently `noble` → `ubuntu:24.04` and `resolute` → `ubuntu:26.04` (plus
+`questing`). Add a new series to that map in **both** `build-test-local.sh` and
+`docker-ppa-upload.sh`, and make sure the toolchain pin in `control`/`rules` is a
+version that series actually ships. For multiple series, re-run either script
+with each series name — it appends `~<series>1` to the version so each upload is
+unique in the PPA. Same PPA, same shared orig; Launchpad builds each series for
+the enabled architectures (amd64 + arm64) automatically — no per-series enable.
 
 ## Files
 
 | File | Purpose |
 |---|---|
-| `control` | Source/binary metadata, Build-Depends (`cargo-1.89`, `rustc-1.89`) |
+| `control` | Source/binary metadata, Build-Depends (`cargo-1.91`, `rustc-1.91`) |
 | `rules` | debhelper rules; offline cargo build (abs vendor path + checksum fixup) + man page install |
 | `changelog` | Version + target series (retargeted by the helper) |
 | `copyright` | DEP-5; GPL-3.0-or-later + a simplified `vendor/*` stanza |
