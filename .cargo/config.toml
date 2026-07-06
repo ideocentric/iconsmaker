@@ -1,0 +1,14 @@
+# Statically link the MSVC C runtime on Windows so the produced .exe is fully
+# self-contained and does NOT depend on the Visual C++ redistributable
+# (vcruntime140.dll). Without this, running the binary on a clean Windows image
+# fails with 0xC0000135 STATUS_DLL_NOT_FOUND — which is what winget's validation
+# hit ("The most common dependency is Microsoft.VCRedist.2015+.x64").
+#
+# These sections only apply when building for the Windows MSVC targets, so Linux
+# and macOS builds (and the offline Debian/PPA build) are unaffected.
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
