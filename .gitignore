@@ -65,5 +65,8 @@ $RECYCLE.BIN/
 
 # ── Linux ──────────────────────────────────────────────────────────────────────
 *~
-.nfs*.venv/
+.nfs*
+
+# ── Python venvs (local tooling: pefile PE checks, copr-cli trigger) ────────────
+.venv/
 .copr-venv/
