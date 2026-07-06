@@ -71,12 +71,18 @@ git config --global --add safe.directory /src
 # The orig tarball is named by the UPSTREAM version only ($VER), independent of
 # the ~ppaN/~series revision. Launchpad rejects a re-upload whose orig has the
 # same name but different bytes ("already exists ... but ... different contents").
-# So if an orig for $VER is already published, download and REUSE it verbatim
+# So if an orig for $VER already exists in the PPA, download and REUSE it verbatim
 # (checksum matches) and upload source-only (-sd). Otherwise build it (-sa).
+#
+# Check BOTH Published AND Pending: when bumping several series at once, the first
+# series' source may still be Pending when the next runs, but its orig is already
+# in the archive — so a Published-only check would miss it, re-vendor a different
+# orig, and get rejected. (This is exactly what bit the resolute 0.1.2 upload.)
 PPA_API="https://api.launchpad.net/devel/~ideocentric/+archive/ubuntu/iconsmaker"
-echo ">> Checking whether $ORIG is already published…"
-ORIG_URL="$(curl -sSL "${PPA_API}?ws.op=getPublishedSources&status=Published" \
-  | jq -r '.entries[].self_link' \
+echo ">> Checking whether $ORIG already exists in the PPA (Published or Pending)…"
+ORIG_URL="$(for st in Published Pending; do
+    curl -sSL "${PPA_API}?ws.op=getPublishedSources&status=${st}" | jq -r '.entries[].self_link'
+  done \
   | while read -r sp; do curl -sSL "${sp}?ws.op=sourceFileUrls" | jq -r '.[]'; done \
   | grep -F "/${ORIG}" | head -1 || true)"
 
