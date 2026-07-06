@@ -14,10 +14,15 @@
 #   dnf copr enable ideocentric/iconsmaker
 #   dnf install iconsmaker
 #
-# Bump `Version` (and add a %changelog entry) for each new tagged release.
+# Bump `Version` (and add a %changelog entry) for each release — do it in the SAME
+# commit as the Cargo.toml bump, BEFORE cutting the vX.Y.Z tag. COPR builds the spec
+# from whichever committish it clones, but Source0 fetches vX.Y.Z.tar.gz keyed on
+# THIS Version, so a stale Version here silently rebuilds the old release. (If the
+# tag was already cut without the bump, trigger the build from `main`:
+# packaging/copr/trigger-copr-build.sh main)
 
 Name:           iconsmaker
-Version:        0.1.1
+Version:        0.1.2
 Release:        1%{?dist}
 Summary:        Generate platform icon bundles (macOS, Windows, Linux) from a single SVG
 
@@ -64,6 +69,8 @@ install -Dm0644 %{name}.1 %{buildroot}%{_mandir}/man1/%{name}.1
 %{_mandir}/man1/%{name}.1*
 
 %changelog
+* Mon Jul 06 2026 Matt Comeione <6080346+ideocentric@users.noreply.github.com> - 0.1.2-1
+- New upstream release 0.1.2 (Windows static-CRT fix; no Fedora-visible change)
 * Fri Jul 03 2026 Matt Comeione <6080346+ideocentric@users.noreply.github.com> - 0.1.1-1
 - Maintenance release (dead-code cleanup; packaging updates)
 * Fri Jul 03 2026 Matt Comeione <6080346+ideocentric@users.noreply.github.com> - 0.1.0-1
