@@ -65,7 +65,7 @@ gpg --batch --import /work/secret.asc
 PKG=iconsmaker
 VER="$(sed -n '1s/^[^(]*(\([0-9.]*\)-.*/\1/p' /src/packaging/debian/changelog)"
 ORIG="${PKG}_${VER}.orig.tar.gz"
-B=/tmp/b; S="$B/$PKG-$VER"; mkdir -p "$B"
+B=/tmp/b; S="$B/$PKG-$VER"; mkdir -p "$S"   # $S needed by the first-upload tar; the reuse path just repopulates it
 git config --global --add safe.directory /src
 
 # The orig tarball is named by the UPSTREAM version only ($VER), independent of
