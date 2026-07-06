@@ -288,6 +288,10 @@ jobs:
           mkdir -p ~/.config
           printf '%s\n' "$COPR_CONFIG" > ~/.config/copr
           pipx install copr-cli
+          # copr-cli 2.5 imports `rich` but fails to declare it as a dependency,
+          # so pipx's isolated venv is missing it (ModuleNotFoundError: rich).
+          # Inject it so the CLI can start.
+          pipx inject copr-cli rich
           copr-cli buildscm ideocentric/iconsmaker \
             --clone-url "https://github.com/${{ github.repository }}" \
             --commit "${GITHUB_REF_NAME}" \
