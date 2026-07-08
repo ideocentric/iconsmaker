@@ -23,6 +23,21 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    // ── Bare invocation → help ──────────────────────────────────────────────
+    // Launched with no CLI arguments and no icons.toml to auto-load, there is
+    // nothing to act on: print help to stdout and exit 0, matching the
+    // docker/kubectl/gh convention (bare invocation = "show me what this does").
+    // Passing an incomplete/invalid flag set still runs the validation grid
+    // below and exits non-zero. This also keeps winget's install-and-launch
+    // validation green — it runs the binary with no arguments, and a non-zero
+    // exit there is flagged as an executable error.
+    if std::env::args_os().count() == 1 && cli.config.is_none() && !Path::new("icons.toml").exists()
+    {
+        Cli::command().print_help().context("failed to print help")?;
+        println!();
+        return Ok(());
+    }
+
     // ── Config detection ────────────────────────────────────────────────────
     // Explicit --config must exist. Otherwise use ./icons.toml when present, or
     // fall back to an empty config (flags-only mode).

@@ -1,3 +1,13 @@
+iconsmaker (0.1.3-1~ppa1) noble; urgency=medium
+
+  * New upstream release 0.1.3. Running iconsmaker with no arguments (and no
+    icons.toml in the working directory) now prints help and exits 0, matching
+    common CLI convention; an incomplete flag set still reports what is missing
+    and exits non-zero. No change to generated output.
+  * Continues to build against the pinned cargo-1.91/rustc-1.91 toolchain.
+
+ -- Matt Comeione <oss@ideocentric.com>  Wed, 08 Jul 2026 22:19:05 +0000
+
 iconsmaker (0.1.2-1~ppa1) noble; urgency=medium
 
   * New upstream release 0.1.2. No functional change to the Linux build — the

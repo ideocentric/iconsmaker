@@ -22,7 +22,7 @@
 # packaging/copr/trigger-copr-build.sh main)
 
 Name:           iconsmaker
-Version:        0.1.2
+Version:        0.1.3
 Release:        1%{?dist}
 Summary:        Generate platform icon bundles (macOS, Windows, Linux) from a single SVG
 
@@ -69,6 +69,9 @@ install -Dm0644 %{name}.1 %{buildroot}%{_mandir}/man1/%{name}.1
 %{_mandir}/man1/%{name}.1*
 
 %changelog
+* Wed Jul 08 2026 Matt Comeione <6080346+ideocentric@users.noreply.github.com> - 0.1.3-1
+- Run with no arguments now prints help and exits 0 (was a non-zero "no target
+  selected" error); the validation grid still errors on incomplete flag sets.
 * Mon Jul 06 2026 Matt Comeione <6080346+ideocentric@users.noreply.github.com> - 0.1.2-1
 - New upstream release 0.1.2 (Windows static-CRT fix; no Fedora-visible change)
 * Fri Jul 03 2026 Matt Comeione <6080346+ideocentric@users.noreply.github.com> - 0.1.1-1

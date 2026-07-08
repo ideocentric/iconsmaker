@@ -190,6 +190,11 @@ iconsmaker -i logo.svg --all \
 Passing **any** platform/packaging flag switches selection to the CLI, so a lone
 `--macos` builds *only* macOS (it does not also pick up platforms from the config).
 
+Run with **no arguments** (and no `icons.toml` in the working directory) and
+`iconsmaker` prints its help and exits `0`, like `docker` or `kubectl`. An
+*incomplete* invocation — flags that don't add up to a buildable target — still
+reports what's missing and exits non-zero.
+
 ### Required fields depend on the platforms you select
 
 Requirements form a grid. iconsmaker reports every missing field at once, naming
